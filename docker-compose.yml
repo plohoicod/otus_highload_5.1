@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  redis:
+    image: docker.io/bitnami/redis:7.2
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+  backend:
+    image: backend-client-5.1:0.0.1
+    networks:
+      - pgnet
+      - services
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT= 8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgcslave2/postgres
+
+networks:
+  pgnet:
+    external: true
+    name: pgnet
+  services:
+    external: true
+    name: services
+
+volumes:
+  redis_data:
+    driver: local
